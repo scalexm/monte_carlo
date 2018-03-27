@@ -1,9 +1,8 @@
 #ifndef DETAIL_VAR_SEQUENCE_HPP
 #define DETAIL_VAR_SEQUENCE_HPP
 
-#include <iostream>
-
 namespace detail {
+    // Fonction $H$ du poly (page 175).
     template<class Float>
     auto H(Float state, Float x, Float alpha) -> Float {
         if (x < state)
@@ -11,6 +10,7 @@ namespace detail {
         return 1 - 1 / (1 - alpha);
     }
 
+    // Encapsule la suite $\xi_n$ du poly (page 175).
     template<class Float>
     class var_sequence {
         private:

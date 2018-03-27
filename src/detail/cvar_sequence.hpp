@@ -2,19 +2,24 @@
 #define DETAIL_CVAR_SEQUENCE_HPP
 
 #include "var_sequence.hpp"
-#include <algorithm>
+#include <algorithm> // `std::max`
 
 namespace detail {
+    // Fonction $\Lambda$ du poly (page 176).
     template<class Float>
     auto Lambda(Float state, Float x, Float alpha) -> Float {
         return state + 1 / (1 - alpha) * std::max(x - state, static_cast<Float>(0));
     }
 
+    // Encapsule la suite $C_n$ du poly (page 176).
     template<class Float>
     class cvar_sequence {
         private:
             Float alpha, state = 0;
+            
+            // On calcule $\xi_n$ à la volée.
             var_sequence<Float> var_state;
+
             int n = 0;
 
         public:

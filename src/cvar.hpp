@@ -1,6 +1,9 @@
 #include "var.hpp"
 #include "detail/cvar_sequence.hpp"
 
+// Noyau de calcul de la CV@R qui suit l'approche décrite page 176 où on se sert du calcul
+// de la V@R à la volée.
+// En pratique, ne marche bien que pour un niveau de confiance proche de 1/2.
 template<class Float = double, class Gamma = decltype(gamma_sequences::inverse<Float>)>
 class cvar_seq_kernel {
     private:
@@ -9,6 +12,7 @@ class cvar_seq_kernel {
         int iterations;
 
     public:
+        // Cf `var.hpp/var_seq_kernel::var_seq_kernel` (mêmes paramètres).
         cvar_seq_kernel(
             Float alpha,
             int iterations,
@@ -22,6 +26,7 @@ class cvar_seq_kernel {
         auto operator =(const cvar_seq_kernel &) -> cvar_seq_kernel & = default;
         auto operator =(cvar_seq_kernel &&) -> cvar_seq_kernel & = default;
 
+        // Idem, voir les paramètres "génériques" décrits dans `var.hpp`.
         template<class Distribution, class Generator>
         auto compute(Distribution & d, Generator & g) -> Float {
             auto sequence = detail::cvar_sequence<Float> { alpha };
@@ -33,6 +38,7 @@ class cvar_seq_kernel {
         }
 };
 
+// Noyau de calcul de la CV@R par Monte Carlo. Nécessite une estimation de la V@R.
 template<class Float = double>
 class cvar_monte_carlo_kernel {
     private:
@@ -53,6 +59,7 @@ class cvar_monte_carlo_kernel {
         auto operator =(const cvar_monte_carlo_kernel &) -> cvar_monte_carlo_kernel & = default;
         auto operator =(cvar_monte_carlo_kernel &&) -> cvar_monte_carlo_kernel & = default;
 
+        // Paramètres génériques d'un noyau de calcul (cf `var.hpp`).
         template<class Distribution, class Generator>
         auto compute(Distribution & d, Generator & g) -> Float {
             Float sum = 0;
