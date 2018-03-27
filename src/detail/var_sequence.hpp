@@ -1,3 +1,6 @@
+#ifndef DETAIL_VAR_SEQUENCE_HPP
+#define DETAIL_VAR_SEQUENCE_HPP
+
 #include <iostream>
 
 namespace detail {
@@ -37,3 +40,5 @@ namespace detail {
             }
     };
 }
+
+#endif
