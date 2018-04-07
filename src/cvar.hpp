@@ -12,19 +12,19 @@ namespace cvar {
 // Noyau de calcul de la CV@R qui suit l'approche décrite page 176 où on se sert du calcul
 // de la V@R à la volée.
 // En pratique, ne marche bien que pour un niveau de confiance proche de 1/2.
-template<class Float, class Gamma, class Beta>
+template<class RealType, class Gamma, class Beta>
 class approx_kernel {
     private:
         const Gamma & gamma;
         const Beta & beta;
-        Float alpha;
+        RealType alpha;
         Averaging avg;
         int iterations;
 
     public:
         // Cf `var.hpp/var_seq_kernel::var_seq_kernel` (mêmes paramètres).
         approx_kernel(
-            Float alpha,
+            RealType alpha,
             const Gamma & gamma,
             const Beta & beta,
             Averaging avg,
@@ -37,8 +37,8 @@ class approx_kernel {
 
         // Idem, voir les paramètres "génériques" décrits dans `var.hpp`.
         template<class Distribution, class Generator>
-        auto compute(Distribution & d, Generator & g) -> Float {
-            auto sequence = detail::cvar::approx_sequence<Float, Gamma, Beta> {
+        auto compute(Distribution & d, Generator & g) -> RealType {
+            auto sequence = detail::cvar::approx_sequence<RealType, Gamma, Beta> {
                 alpha,
                 gamma,
                 beta
@@ -53,41 +53,41 @@ class approx_kernel {
 };
 
 template<
-    class Float = double,
-    class Gamma = decltype(steps::inverse<Float>),
+    class RealType = double,
+    class Gamma = decltype(steps::inverse<RealType>),
     class Beta = Gamma
 >
 inline auto stochastic_approx(
-    Float alpha,
+    RealType alpha,
     int iterations,
     Averaging avg = Averaging::No,
-    const Gamma & gamma = steps::inverse<Float>,
-    const Beta & beta = steps::inverse<Float>
-) -> approx_kernel<Float, Gamma, Beta>
+    const Gamma & gamma = steps::inverse<RealType>,
+    const Beta & beta = steps::inverse<RealType>
+) -> approx_kernel<RealType, Gamma, Beta>
 {
-    return approx_kernel<Float, Gamma, Beta> { alpha, gamma, beta, avg, iterations };
+    return approx_kernel<RealType, Gamma, Beta> { alpha, gamma, beta, avg, iterations };
 }
 
 // Noyau de calcul de la CV@R par Monte Carlo. Nécessite une estimation de la V@R.
-template<class Float>
+template<class RealType>
 class monte_carlo_kernel {
     private:
-        Float alpha, estimated_var;
+        RealType alpha, estimated_var;
         int iterations;
 
     public:
-        monte_carlo_kernel(Float alpha, Float estimated_var, int iterations) :
+        monte_carlo_kernel(RealType alpha, RealType estimated_var, int iterations) :
             alpha { alpha }, estimated_var { estimated_var }, iterations { iterations }
         {
         }
 
         // Paramètres génériques d'un noyau de calcul (cf `var.hpp`).
         template<class Distribution, class Generator>
-        auto compute(Distribution & d, Generator & g) -> Float {
-            Float sum = 0;
+        auto compute(Distribution & d, Generator & g) -> RealType {
+            RealType sum = 0;
             int n = 0;
             while (n < iterations) {
-                Float x = d(g);
+                RealType x = d(g);
                 if (x < estimated_var)
                     continue;
                 ++n;
@@ -97,14 +97,14 @@ class monte_carlo_kernel {
         }
 };
 
-template<class Float = double>
+template<class RealType = double>
 inline auto monte_carlo(
-    Float alpha,
-    Float estimated_var,
+    RealType alpha,
+    RealType estimated_var,
     int iterations
-) -> monte_carlo_kernel<Float>
+) -> monte_carlo_kernel<RealType>
 {
-    return monte_carlo_kernel<Float> { alpha, estimated_var, iterations };
+    return monte_carlo_kernel<RealType> { alpha, estimated_var, iterations };
 }
 
 }

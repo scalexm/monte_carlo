@@ -11,11 +11,11 @@ namespace var {
 
 // Noyau de calcul de la V@R qui suit l'approche récursive du poly présentée page 175.
 // En pratique, ne marche bien que pour un niveau de confiance proche de 1/2.
-template<class Float, class Gamma>
+template<class RealType, class Gamma>
 class approx_kernel {
     private:
         Gamma & gamma;
-        Float alpha;
+        RealType alpha;
         Averaging avg;
         int iterations;
 
@@ -23,20 +23,20 @@ class approx_kernel {
         // Paramètres du constructeur:
         // - `alpha`: niveau de confiance
         // - `iterations`: nombre d'itérations de l'algorithme
-        // - `gamma`: foncteur `int -> float`, `gamma(n)` représentant la suite $\gamma_n$ du poly
-        approx_kernel(Float alpha, Gamma & gamma, Averaging avg, int iterations) :
+        // - `gamma`: foncteur `int -> RealType`, `gamma(n)` représentant la suite $\gamma_n$ du poly
+        approx_kernel(RealType alpha, Gamma & gamma, Averaging avg, int iterations) :
             alpha { alpha }, gamma { gamma }, avg { avg }, iterations { iterations }
         {
         }
 
         // Paramètres génériques d'un noyau de calcul:
-        // - `d`: foncteur `Generator -> Float` représentant la distribution de $X$, usuellement
+        // - `d`: foncteur `Generator -> RealType` représentant la distribution de $X$, usuellement
         //   on prend un objet défini dans le header <random>
         // - `g`: générateur de nombre aléatoires, usuellement on prend aussi un objet défini dans
         //   le header <random>
         template<class Distribution, class Generator>
-        auto compute(Distribution & d, Generator & g) -> Float {
-            auto sequence = detail::var::approx_sequence<Float, Gamma> { alpha, gamma };
+        auto compute(Distribution & d, Generator & g) -> RealType {
+            auto sequence = detail::var::approx_sequence<RealType, Gamma> { alpha, gamma };
             if (avg == Averaging::No) {
                 return detail::iterate(sequence, iterations, d, g);
             } else {
@@ -46,15 +46,15 @@ class approx_kernel {
         }
 };
 
-template<class Float = double, class Gamma = decltype(steps::inverse<Float>)>
+template<class RealType = double, class Gamma = decltype(steps::inverse<RealType>)>
 inline auto stochastic_approx(
-    Float alpha,
+    RealType alpha,
     int iterations,
     Averaging avg = Averaging::No,
-    Gamma & gamma = steps::inverse<Float>
-) -> approx_kernel<Float, Gamma>
+    Gamma & gamma = steps::inverse<RealType>
+) -> approx_kernel<RealType, Gamma>
 {
-    return approx_kernel<Float, Gamma> { alpha, gamma, avg, iterations };
+    return approx_kernel<RealType, Gamma> { alpha, gamma, avg, iterations };
 }
 
 }

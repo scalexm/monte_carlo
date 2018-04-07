@@ -8,26 +8,26 @@ namespace detail {
 namespace cvar {
 
 // Fonction $\Lambda$ du poly (page 176).
-template<class Float>
-auto Lambda(Float state, Float x, Float alpha) -> Float {
-    return state + 1 / (1 - alpha) * std::max(x - state, static_cast<Float>(0));
+template<class RealType>
+auto Lambda(RealType state, RealType x, RealType alpha) -> RealType {
+    return state + 1 / (1 - alpha) * std::max(x - state, static_cast<RealType>(0));
 }
 
 // Encapsule la suite $C_n$ du poly (page 176).
-template<class Float, class Gamma, class Beta>
+template<class RealType, class Gamma, class Beta>
 class approx_sequence {
     private:
-        Float alpha, C = 0;
+        RealType alpha, C = 0;
         const Beta & beta;
         
         // On calcule $\xi_n$ à la volée.
-        detail::var::approx_sequence<Float, Gamma> xi;
+        detail::var::approx_sequence<RealType, Gamma> xi;
         int n = 0;
 
     public:
-        using result_type = Float;
+        using result_type = RealType;
 
-        approx_sequence(Float alpha, const Gamma & gamma, const Beta & beta) :
+        approx_sequence(RealType alpha, const Gamma & gamma, const Beta & beta) :
             alpha { alpha }, xi { alpha, gamma }, beta { beta }
         {
         }
@@ -38,6 +38,7 @@ class approx_sequence {
                 ++n;
                 return C;
             }
+
             auto lambda = Lambda(xi.next(d, g), d(g), alpha);
             C -= beta(n) * (C - lambda);
             ++n;
