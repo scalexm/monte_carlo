@@ -9,16 +9,13 @@ auto main() -> int {
     
     std::exponential_distribution<> d(1);
 
-    auto var_kernel = var_seq_kernel<> { 0.5, 1000000 };
-    auto var = var_kernel.compute(d, gen);
+    auto var = var::sequential(0.5, 1000000).compute(d, gen);
     std::cout << var << std::endl;
 
-    auto cvar_kernel1 = cvar_seq_kernel<> { 0.5, 1000000 };
-    auto cvar1 = cvar_kernel1.compute(d, gen);
+    auto cvar1 = cvar::sequential(0.5, 1000000).compute(d, gen);
     std::cout << cvar1 << std::endl;
 
-    auto cvar_kernel2 = cvar_monte_carlo_kernel<> { 0.5, var, 1000000 };
-    auto cvar2 = cvar_kernel2.compute(d, gen);
+    auto cvar2 = cvar::monte_carlo(0.5, var, 1000000).compute(d, gen);
     std::cout << cvar2 << std::endl;
 
     return 0;
