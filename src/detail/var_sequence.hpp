@@ -16,13 +16,13 @@ template<class Float, class Gamma>
 class var_sequence {
     private:
         Float alpha, state = 0;
-        Gamma & gamma;
+        const Gamma & gamma;
         int n = 0;
 
     public:
         using result_type = Float;
 
-        var_sequence(Float alpha, Gamma & gamma) : alpha { alpha }, gamma { gamma }
+        var_sequence(Float alpha, const Gamma & gamma) : alpha { alpha }, gamma { gamma }
         {
         }
 

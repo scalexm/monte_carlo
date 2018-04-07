@@ -3,7 +3,9 @@
 
 #include "detail/cvar_sequence.hpp"
 #include "detail/iterate.hpp"
+#include "detail/averaging.hpp"
 #include "gamma_sequences.hpp"
+#include "averaging.hpp"
 
 namespace cvar {
 
@@ -13,15 +15,23 @@ namespace cvar {
 template<class Float, class Gamma, class Beta>
 class sequential_kernel {
     private:
-        Gamma & gamma;
-        Beta & beta;
+        const Gamma & gamma;
+        const Beta & beta;
         Float alpha;
+        Averaging avg;
         int iterations;
 
     public:
         // Cf `var.hpp/var_seq_kernel::var_seq_kernel` (mêmes paramètres).
-        sequential_kernel(Float alpha, Gamma & gamma, Beta & beta, int iterations) :
-            alpha { alpha }, gamma { gamma }, beta { beta }, iterations { iterations }
+        sequential_kernel(
+            Float alpha,
+            const Gamma & gamma,
+            const Beta & beta,
+            Averaging avg,
+            int iterations
+        ) :
+            alpha { alpha }, gamma { gamma }, beta { beta }, avg { avg },
+            iterations { iterations }
         {
         }
 
@@ -29,7 +39,12 @@ class sequential_kernel {
         template<class Distribution, class Generator>
         auto compute(Distribution & d, Generator & g) -> Float {
             auto sequence = detail::cvar_sequence<Float, Gamma, Beta> { alpha, gamma, beta };
-            return detail::iterate(sequence, iterations, d, g);
+            if (avg == Averaging::No) {
+                return detail::iterate(sequence, iterations, d, g);
+            } else {
+                auto avg_sequence = detail::averaging<decltype(sequence)> { std::move(sequence) };
+                return detail::iterate(avg_sequence, iterations, d, g);
+            }
         }
 };
 
@@ -41,11 +56,12 @@ template<
 inline auto sequential(
     Float alpha,
     int iterations,
-    Gamma & gamma = gamma_sequences::inverse<Float>,
-    Beta & beta = gamma_sequences::inverse<Float>
+    Averaging avg = Averaging::No,
+    const Gamma & gamma = gamma_sequences::inverse<Float>,
+    const Beta & beta = gamma_sequences::inverse<Float>
 ) -> sequential_kernel<Float, Gamma, Beta>
 {
-    return sequential_kernel<Float, Gamma, Beta> { alpha, gamma, beta, iterations };
+    return sequential_kernel<Float, Gamma, Beta> { alpha, gamma, beta, avg, iterations };
 }
 
 // Noyau de calcul de la CV@R par Monte Carlo. Nécessite une estimation de la V@R.

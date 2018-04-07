@@ -17,7 +17,7 @@ template<class Float, class Gamma, class Beta>
 class cvar_sequence {
     private:
         Float alpha, state = 0;
-        Beta & beta;
+        const Beta & beta;
         
         // On calcule $\xi_n$ à la volée.
         detail::var_sequence<Float, Gamma> var_state;
@@ -26,7 +26,7 @@ class cvar_sequence {
     public:
         using result_type = Float;
 
-        cvar_sequence(Float alpha, Gamma & gamma, Beta & beta) :
+        cvar_sequence(Float alpha, const Gamma & gamma, const Beta & beta) :
             alpha { alpha }, var_state { alpha, gamma }, beta { beta }
         {
         }

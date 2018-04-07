@@ -3,7 +3,9 @@
 
 #include "detail/var_sequence.hpp"
 #include "detail/iterate.hpp"
+#include "detail/averaging.hpp"
 #include "gamma_sequences.hpp"
+#include "averaging.hpp"
 
 namespace var {
 
@@ -14,6 +16,7 @@ class sequential_kernel {
     private:
         Gamma & gamma;
         Float alpha;
+        Averaging avg;
         int iterations;
 
     public:
@@ -21,8 +24,8 @@ class sequential_kernel {
         // - `alpha`: niveau de confiance
         // - `iterations`: nombre d'itérations de l'algorithme
         // - `gamma`: foncteur `int -> float`, `gamma(n)` représentant la suite $\gamma_n$ du poly
-        sequential_kernel(Float alpha, Gamma & gamma, int iterations) :
-            alpha { alpha }, gamma { gamma }, iterations { iterations }
+        sequential_kernel(Float alpha, Gamma & gamma, Averaging avg, int iterations) :
+            alpha { alpha }, gamma { gamma }, avg { avg }, iterations { iterations }
         {
         }
 
@@ -34,7 +37,12 @@ class sequential_kernel {
         template<class Distribution, class Generator>
         auto compute(Distribution & d, Generator & g) -> Float {
             auto sequence = detail::var_sequence<Float, Gamma> { alpha, gamma };
-            return detail::iterate(sequence, iterations, d, g);
+            if (avg == Averaging::No) {
+                return detail::iterate(sequence, iterations, d, g);
+            } else {
+                auto avg_sequence = detail::averaging<decltype(sequence)> { std::move(sequence) };
+                return detail::iterate(avg_sequence, iterations, d, g);
+            }
         }
 };
 
@@ -42,10 +50,11 @@ template<class Float = double, class Gamma = decltype(gamma_sequences::inverse<F
 inline auto sequential(
     Float alpha,
     int iterations,
+    Averaging avg = Averaging::No,
     Gamma & gamma = gamma_sequences::inverse<Float>
 ) -> sequential_kernel<Float, Gamma>
 {
-    return sequential_kernel<Float, Gamma> { alpha, gamma, iterations };
+    return sequential_kernel<Float, Gamma> { alpha, gamma, avg, iterations };
 }
 
 }
