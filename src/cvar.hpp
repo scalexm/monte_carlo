@@ -4,7 +4,7 @@
 #include "detail/cvar_sequence.hpp"
 #include "detail/iterate.hpp"
 #include "detail/averaging.hpp"
-#include "gamma_sequences.hpp"
+#include "steps.hpp"
 #include "averaging.hpp"
 
 namespace cvar {
@@ -50,15 +50,15 @@ class sequential_kernel {
 
 template<
     class Float = double,
-    class Gamma = decltype(gamma_sequences::inverse<Float>),
+    class Gamma = decltype(steps::inverse<Float>),
     class Beta = Gamma
 >
 inline auto sequential(
     Float alpha,
     int iterations,
     Averaging avg = Averaging::No,
-    const Gamma & gamma = gamma_sequences::inverse<Float>,
-    const Beta & beta = gamma_sequences::inverse<Float>
+    const Gamma & gamma = steps::inverse<Float>,
+    const Beta & beta = steps::inverse<Float>
 ) -> sequential_kernel<Float, Gamma, Beta>
 {
     return sequential_kernel<Float, Gamma, Beta> { alpha, gamma, beta, avg, iterations };

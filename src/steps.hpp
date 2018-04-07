@@ -1,10 +1,10 @@
-#ifndef GAMMA_SEQUENCES_HPP
-#define GAMMA_SEQUENCES_HPP
+#ifndef STEPS_HPP
+#define STEPS_HPP
 
 #include <cmath>
 #include <functional>
 
-namespace gamma_sequences {
+namespace steps {
 
 // $n \longmapsto \frac{1}{n}$
 template<class Float>

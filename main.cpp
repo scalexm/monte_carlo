@@ -21,7 +21,7 @@ auto main() -> int {
         0.5,
         N,
         Averaging::Yes,
-        gamma_sequences::inverse_pow<double>(0.75)
+        steps::inverse_pow<double>(0.75)
     ).compute(d, gen);
     std::cout << avg_cvar << std::endl;
 

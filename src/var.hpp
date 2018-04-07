@@ -4,7 +4,7 @@
 #include "detail/var_sequence.hpp"
 #include "detail/iterate.hpp"
 #include "detail/averaging.hpp"
-#include "gamma_sequences.hpp"
+#include "steps.hpp"
 #include "averaging.hpp"
 
 namespace var {
@@ -46,12 +46,12 @@ class sequential_kernel {
         }
 };
 
-template<class Float = double, class Gamma = decltype(gamma_sequences::inverse<Float>)>
+template<class Float = double, class Gamma = decltype(steps::inverse<Float>)>
 inline auto sequential(
     Float alpha,
     int iterations,
     Averaging avg = Averaging::No,
-    Gamma & gamma = gamma_sequences::inverse<Float>
+    Gamma & gamma = steps::inverse<Float>
 ) -> sequential_kernel<Float, Gamma>
 {
     return sequential_kernel<Float, Gamma> { alpha, gamma, avg, iterations };
