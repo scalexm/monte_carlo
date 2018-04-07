@@ -1,10 +1,11 @@
 #ifndef DETAIL_AVERAGING_HPP
 #define DETAIL_AVERAGING_HPP
 
-#include <utility>
+#include <utility> // `std::move`
 
 namespace detail {
 
+// Moyennise une suite donnée.
 template<class Sequence>
 class averaging {
 private:

@@ -6,19 +6,20 @@
 namespace detail {
 namespace var {
 
-// Fonction $H$ du poly (page 175).
+// Fonction $H1$ de l'article.
 template<class RealType>
-auto H(RealType state, RealType x, RealType alpha) -> RealType {
-    if (x < state)
+auto H(RealType xi, RealType x, RealType alpha) -> RealType {
+    if (x < xi)
         return 1;
     return 1 - 1 / (1 - alpha);
 }
 
-// Encapsule la suite $\xi_n$ du poly (page 175).
+// Encapsule la suite $\xi_n$ de l'article pour l'algorithme naïf de gradient stochastique de la
+// section 2.2.
 template<class RealType, class Gamma>
 class approx_sequence {
     private:
-        RealType alpha, xi = 0;
+        RealType alpha, xi = 0; // On choisit $\xi_0 = 0$ qui est toujours intégrable.
         const Gamma & gamma;
         int n = 0;
 
@@ -29,6 +30,7 @@ class approx_sequence {
         {
         }
 
+        // Chaque appel à `next` renvoie la prochaine valeur de la suite.
         template<class Distribution, class Generator>
         auto next(Distribution & d, Generator & g) -> result_type {
             if (n == 0) {
@@ -76,7 +78,6 @@ class is_sampling_sequence {
             
 
         }
-
 };
 
 }
