@@ -20,29 +20,37 @@ inline auto v(double xi, double x, double alpha) -> double {
 
 // Encapsule la suite $(\xi_n, C_n)$ de l'article pour l'algorithme naïf de gradient stochastique
 // de la section 2.2. On prendra toujours $\beta_n = \gamma_n$ pour simplifier.
-template<class Gamma>
+template<class Phi, class Gamma, class Distribution, class Generator>
 class approx_sequence {
     private:
+        const Phi & phi;
         double alpha, xi = 0, C = 0; // On choisit $\xi_0 = C_0 = 0$ car toujours intégrables.
         const Gamma & gamma;
         int n = 0;
 
+        Distribution & d;
+        Generator & g;
+
     public:
         using result_type = std::pair<double, double>;
 
-        approx_sequence(double alpha, const Gamma & gamma) :
-            alpha { alpha }, gamma { gamma }
+        approx_sequence(
+            double alpha,
+            const Phi & phi,
+            const Gamma & gamma,
+            Distribution & d,
+            Generator & g
+        ) : alpha { alpha }, phi { phi }, gamma { gamma }, d { d }, g { g }
         {
         }
 
-        template<class Distribution, class Generator>
-        auto next(Distribution & d, Generator & g) -> result_type {
+        auto next() -> result_type {
             if (n == 0) {
                 ++n;
                 return std::make_pair(xi, C);
             }
 
-            double x = d(g);
+            double x = phi(d(g));
             C -= gamma(n) * (C - v(xi, x, alpha));
             xi -= gamma(n) * H1(xi, x, alpha);
             ++n;

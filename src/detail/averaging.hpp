@@ -45,14 +45,13 @@ public:
     {
     }
 
-    template<class Distribution, class Generator>
-    auto next(Distribution & d, Generator & g) -> result_type {
+    auto next() -> result_type {
         if (n == 0) {
-            avg_state = state.next(d, g);
+            avg_state = state.next();
             ++n;
             return avg_state;
         }
-        avg_state = avg_state - (avg_state - state.next(d, g)) / (n + 1);
+        avg_state = avg_state - (avg_state - state.next()) / (n + 1);
         ++n;
         return avg_state;
     }

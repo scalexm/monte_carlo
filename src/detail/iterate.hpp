@@ -3,17 +3,15 @@
 
 namespace detail {
 
-template<class Sequence, class Distribution, class Generator>
+template<class Sequence>
 inline auto iterate(
     Sequence sequence,
-    int iterations,
-    Distribution & d,
-    Generator & g
+    int iterations
 ) -> typename Sequence::result_type
 {
     typename Sequence::result_type state;
     for (int n = 0; n < iterations; ++n)
-        state = sequence.next(d, g);
+        state = sequence.next();
     return state;
 }
 

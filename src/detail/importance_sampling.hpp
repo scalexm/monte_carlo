@@ -33,7 +33,7 @@ inline auto L4(
     return std::exp(-2 * a * (norm * norm + 1)) * L3(xi, mu, x, phi, p) * diff * diff;
 }
 
-template<class Phi, class Gamma>
+template<class Phi, class Gamma, class Distribution, class Generator>
 class IS_phase1_sequence {
     private:
         const Phi & phi;
@@ -45,6 +45,10 @@ class IS_phase1_sequence {
         int M;
         int n = 0;
 
+        Distribution & d;
+        Generator & g;
+        IS_params<Distribution> params;
+
     public:
         using result_type = std::pair<double, double>;
 
@@ -53,14 +57,16 @@ class IS_phase1_sequence {
             double a,
             const Phi & phi,
             const Gamma & gamma,
-            int M
+            int M,
+            Distribution & d,
+            Generator & g
         ) :
-            alpha { alpha }, a { a }, phi { phi }, gamma { gamma }, M { M }
+            alpha { alpha }, a { a }, phi { phi }, gamma { gamma }, M { M }, d { d },
+            g { g }, params { d }
         {
         }
 
-        template<class Distribution, class Generator>
-        auto next(Distribution & d, Generator & g) -> result_type {
+        auto next() -> result_type {
             if (n == 0) {
                 ++n;
                 return std::make_pair(theta, mu);
@@ -74,14 +80,13 @@ class IS_phase1_sequence {
                 alpha_n = 0.8;
             else
                 alpha_n = alpha;
-            
-           auto params = IS_params<Distribution> { d };
-           auto x = d(g);
-           theta -= gamma(n) * L3(xi, theta, x, phi, params);
-           mu -= gamma(n) * L4(xi, mu, x, a, phi, params);
-           xi -= gamma(n) * H1(xi, x, alpha_n);
-           ++n;
-           return std::make_pair(theta, mu);
+
+            auto x = d(g);
+            theta -= gamma(n) * L3(xi, theta, x, phi, params);
+            mu -= gamma(n) * L4(xi, mu, x, a, phi, params);
+            xi -= gamma(n) * H1(xi, x, alpha_n);
+            ++n;
+            return std::make_pair(theta, mu);
         }
 };
 
@@ -117,7 +122,7 @@ inline auto L2(
     return result - 1 / (1 - alpha) * (val - xi) * p.incr(x, mu);
 }
 
-template<class Phi, class Gamma>
+template<class Phi, class Gamma, class Distribution, class Generator>
 class IS_phase2_sequence {
     private:
         const Phi & phi;
@@ -128,6 +133,10 @@ class IS_phase2_sequence {
         const Gamma & gamma;
         int n = 0;
 
+        Distribution & d;
+        Generator & g;
+        IS_params<Distribution> params;
+
     public:
         using result_type = std::pair<double, double>;
 
@@ -136,20 +145,21 @@ class IS_phase2_sequence {
             input_type theta,
             input_type mu,
             const Phi & phi,
-            const Gamma & gamma
+            const Gamma & gamma,
+            Distribution & d,
+            Generator & g
         ) :
-            alpha { alpha }, theta { theta }, mu { mu }, phi { phi }, gamma { gamma }
+            alpha { alpha }, theta { theta }, mu { mu }, phi { phi }, gamma { gamma },
+            d { d }, g { g }, params { d }
         {
         }
 
-        template<class Distribution, class Generator>
-        auto next(Distribution & d, Generator & g) -> result_type {
+        auto next() -> result_type {
             if (n == 0) {
                 ++n;
                 return std::make_pair(xi, C);
             }
 
-            auto params = IS_params<Distribution> { d };
             auto x = d(g);
             C -= gamma(n) * L2(xi, C, mu, x, alpha, phi, params);
             xi -= gamma(n) * L1(xi, theta, x, alpha, phi, params);
