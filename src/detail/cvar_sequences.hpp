@@ -1,10 +1,11 @@
-#ifndef DETAIL_CVAR_SEQUENCE_HPP
-#define DETAIL_CVAR_SEQUENCE_HPP
+#ifndef DETAIL_CVAR_SEQUENCES_HPP
+#define DETAIL_CVAR_SEQUENCES_HPP
 
-#include "var_sequence.hpp"
+#include "var_sequences.hpp"
 #include <algorithm> // `std::max`
 
 namespace detail {
+namespace cvar {
 
 // Fonction $\Lambda$ du poly (page 176).
 template<class Float>
@@ -14,20 +15,20 @@ auto Lambda(Float state, Float x, Float alpha) -> Float {
 
 // Encapsule la suite $C_n$ du poly (page 176).
 template<class Float, class Gamma, class Beta>
-class cvar_sequence {
+class approx_sequence {
     private:
-        Float alpha, state = 0;
+        Float alpha, C = 0;
         const Beta & beta;
         
         // On calcule $\xi_n$ à la volée.
-        detail::var_sequence<Float, Gamma> var_state;
+        detail::var::approx_sequence<Float, Gamma> xi;
         int n = 0;
 
     public:
         using result_type = Float;
 
-        cvar_sequence(Float alpha, const Gamma & gamma, const Beta & beta) :
-            alpha { alpha }, var_state { alpha, gamma }, beta { beta }
+        approx_sequence(Float alpha, const Gamma & gamma, const Beta & beta) :
+            alpha { alpha }, xi { alpha, gamma }, beta { beta }
         {
         }
 
@@ -35,15 +36,16 @@ class cvar_sequence {
         auto next(Distribution & d, Generator & g) -> result_type {
             if (n == 0) {
                 ++n;
-                return state;
+                return C;
             }
-            auto lambda = Lambda(var_state.next(d, g), d(g), alpha);
-            state -= beta(n) * (state - lambda);
+            auto lambda = Lambda(xi.next(d, g), d(g), alpha);
+            C -= beta(n) * (C - lambda);
             ++n;
-            return state;
+            return C;
         }
 };
 
+}
 }
 
 #endif

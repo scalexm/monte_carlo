@@ -1,7 +1,8 @@
-#ifndef DETAIL_VAR_SEQUENCE_HPP
-#define DETAIL_VAR_SEQUENCE_HPP
+#ifndef DETAIL_VAR_SEQUENCES_HPP
+#define DETAIL_VAR_SEQUENCES_HPP
 
 namespace detail {
+namespace var {
 
 // Fonction $H$ du poly (page 175).
 template<class Float>
@@ -13,16 +14,16 @@ auto H(Float state, Float x, Float alpha) -> Float {
 
 // Encapsule la suite $\xi_n$ du poly (page 175).
 template<class Float, class Gamma>
-class var_sequence {
+class approx_sequence {
     private:
-        Float alpha, state = 0;
+        Float alpha, xi = 0;
         const Gamma & gamma;
         int n = 0;
 
     public:
         using result_type = Float;
 
-        var_sequence(Float alpha, const Gamma & gamma) : alpha { alpha }, gamma { gamma }
+        approx_sequence(Float alpha, const Gamma & gamma) : alpha { alpha }, gamma { gamma }
         {
         }
 
@@ -30,14 +31,21 @@ class var_sequence {
         auto next(Distribution & d, Generator & g) -> result_type {
             if (n == 0) {
                 ++n;
-                return state;
+                return xi;
             }
-            state -= gamma(n) * H(state, d(g), alpha);
+            xi -= gamma(n) * H(xi, d(g), alpha);
             ++n;
-            return state;
+            return xi;
         }
 };
 
+template<class Float, class Gamma>
+class is_sampling_sequence {
+    private:
+
+};
+
+}
 }
 
 #endif

@@ -11,13 +11,13 @@ auto main() -> int {
 
     std::exponential_distribution<> d(1);
 
-    auto var = var::sequential(0.5, N).compute(d, gen);
+    auto var = var::stochastic_approx(0.5, N).compute(d, gen);
     std::cout << var << std::endl;
 
-    auto cvar = cvar::sequential(0.5, N).compute(d, gen);
+    auto cvar = cvar::stochastic_approx(0.5, N).compute(d, gen);
     std::cout << cvar << std::endl;
 
-    auto avg_cvar = cvar::sequential(
+    auto avg_cvar = cvar::stochastic_approx(
         0.5,
         N,
         Averaging::Yes,

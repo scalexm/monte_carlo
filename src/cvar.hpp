@@ -1,7 +1,7 @@
 #ifndef CVAR_HPP
 #define CVAR_HPP
 
-#include "detail/cvar_sequence.hpp"
+#include "detail/cvar_sequences.hpp"
 #include "detail/iterate.hpp"
 #include "detail/averaging.hpp"
 #include "steps.hpp"
@@ -13,7 +13,7 @@ namespace cvar {
 // de la V@R à la volée.
 // En pratique, ne marche bien que pour un niveau de confiance proche de 1/2.
 template<class Float, class Gamma, class Beta>
-class sequential_kernel {
+class approx_kernel {
     private:
         const Gamma & gamma;
         const Beta & beta;
@@ -23,7 +23,7 @@ class sequential_kernel {
 
     public:
         // Cf `var.hpp/var_seq_kernel::var_seq_kernel` (mêmes paramètres).
-        sequential_kernel(
+        approx_kernel(
             Float alpha,
             const Gamma & gamma,
             const Beta & beta,
@@ -38,7 +38,11 @@ class sequential_kernel {
         // Idem, voir les paramètres "génériques" décrits dans `var.hpp`.
         template<class Distribution, class Generator>
         auto compute(Distribution & d, Generator & g) -> Float {
-            auto sequence = detail::cvar_sequence<Float, Gamma, Beta> { alpha, gamma, beta };
+            auto sequence = detail::cvar::approx_sequence<Float, Gamma, Beta> {
+                alpha,
+                gamma,
+                beta
+            };
             if (avg == Averaging::No) {
                 return detail::iterate(sequence, iterations, d, g);
             } else {
@@ -53,15 +57,15 @@ template<
     class Gamma = decltype(steps::inverse<Float>),
     class Beta = Gamma
 >
-inline auto sequential(
+inline auto stochastic_approx(
     Float alpha,
     int iterations,
     Averaging avg = Averaging::No,
     const Gamma & gamma = steps::inverse<Float>,
     const Beta & beta = steps::inverse<Float>
-) -> sequential_kernel<Float, Gamma, Beta>
+) -> approx_kernel<Float, Gamma, Beta>
 {
-    return sequential_kernel<Float, Gamma, Beta> { alpha, gamma, beta, avg, iterations };
+    return approx_kernel<Float, Gamma, Beta> { alpha, gamma, beta, avg, iterations };
 }
 
 // Noyau de calcul de la CV@R par Monte Carlo. Nécessite une estimation de la V@R.
