@@ -7,18 +7,16 @@
 namespace steps {
 
 // $n \longmapsto \frac{1}{n}$
-template<class RealType>
-auto inverse(int n) -> RealType {
-    return 1 / static_cast<RealType>(n);
+auto inverse(int n) -> double {
+    return 1 / static_cast<double>(n);
 }
 
 // $n \longmapsto \frac{1}{n^a}$
 // FIXME: retourne un objet `std::function<...>`, ce qui peut donner lieu à des allocations.
 // Le standard C++11 préconise d'éviter de telles allocations, mais ne l'impose pas.
 // En C++14, il suffirait de laisser le compilateur inférer un type de retour pour régler ça.
-template<class RealType = double, class Exp>
-auto inverse_pow(Exp a) -> std::function<RealType(int)> {
-    return [a](int n) { return std::pow(inverse<RealType>(n), a); };
+auto inverse_pow(double a = 0.75, int offset = 100) -> std::function<double(int)> {
+    return [a, offset](int n) { return 1 / (std::pow(n, a) + offset); };
 }
 
 }

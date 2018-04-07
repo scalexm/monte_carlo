@@ -1,32 +1,32 @@
-#include "src/var.hpp"
-#include "src/cvar.hpp"
-#include <iostream>
+#include "src/estimate.hpp"
 #include <random>
+#include <iostream>
 
-constexpr int N = 1000000;
+constexpr int N = 10000;
 
 auto main() -> int {
     std::random_device rd;
     std::mt19937 gen(rd());
 
-    std::exponential_distribution<> d(1);
+    auto phi = [](double x) {
+        auto S = 100 * std::exp((0.05 - 0.2 * 0.2 / 2) + 0.2 * x);
+        auto result = -std::exp(0.05) * 10.7;
+        if (110 < S)
+            return result;
+        return 110 - S + result;
+    };
 
-    auto var = var::stochastic_approx(0.5, N).compute(d, gen);
-    std::cout << var << std::endl;
+    std::normal_distribution<> d(0., 1.);
 
-    auto cvar = cvar::stochastic_approx(0.5, N).compute(d, gen);
+    auto real_d = [&phi, &d](std::mt19937 & g) {
+        return phi(d(g));
+    };
+
+    auto cvar = stochastic_gradient(0.995, N, steps::inverse_pow()).compute(real_d, gen).second;
     std::cout << cvar << std::endl;
 
-    auto avg_cvar = cvar::stochastic_approx(
-        0.5,
-        N,
-        Averaging::Yes,
-        steps::inverse_pow<double>(0.75)
-    ).compute(d, gen);
-    std::cout << avg_cvar << std::endl;
-
-    auto mc_cvar = cvar::monte_carlo(0.5, var, N).compute(d, gen);
-    std::cout << mc_cvar << std::endl;
+    auto IS_cvar = importance_sampling(0.995, 1., N, phi, steps::inverse_pow()).compute(d, gen).second;
+    std::cout << IS_cvar << std::endl;
 
     return 0;
 }
