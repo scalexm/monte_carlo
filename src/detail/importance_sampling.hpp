@@ -50,7 +50,7 @@ class IS_phase1_sequence {
         IS_params<Distribution> params;
 
     public:
-        using result_type = std::pair<double, double>;
+        using result_type = std::tuple<double, double, double>;
 
         IS_phase1_sequence(
             double alpha,
@@ -69,7 +69,7 @@ class IS_phase1_sequence {
         auto next() -> result_type {
             if (n == 0) {
                 ++n;
-                return std::make_pair(theta, mu);
+                return std::make_tuple(xi, theta, mu);
             }
             
             double alpha_n;
@@ -86,7 +86,7 @@ class IS_phase1_sequence {
             mu -= gamma(n) * L4(xi, mu, x, a, phi, params);
             xi -= gamma(n) * H1(xi, x, alpha_n);
             ++n;
-            return std::make_pair(theta, mu);
+            return std::make_tuple(xi, theta, mu);
         }
 };
 
@@ -128,7 +128,7 @@ class IS_phase2_sequence {
         const Phi & phi;
         using input_type = decltype(phi(0));
 
-        double alpha, xi = 0, C = 0;
+        double alpha, xi, C = 0;
         input_type theta, mu;
         const Gamma & gamma;
         int n = 0;
@@ -138,10 +138,11 @@ class IS_phase2_sequence {
         IS_params<Distribution> params;
 
     public:
-        using result_type = std::pair<double, double>;
+        using result_type = std::tuple<double, double>;
 
         IS_phase2_sequence(
             double alpha,
+            double xi,
             input_type theta,
             input_type mu,
             const Phi & phi,
@@ -149,22 +150,22 @@ class IS_phase2_sequence {
             Distribution & d,
             Generator & g
         ) :
-            alpha { alpha }, theta { theta }, mu { mu }, phi { phi }, gamma { gamma },
-            d { d }, g { g }, params { d }
+            alpha { alpha }, xi { xi }, theta { theta }, mu { mu }, phi { phi },
+            gamma { gamma }, d { d }, g { g }, params { d }
         {
         }
 
         auto next() -> result_type {
             if (n == 0) {
                 ++n;
-                return std::make_pair(xi, C);
+                return std::make_tuple(xi, C);
             }
 
             auto x = d(g);
             C -= gamma(n) * L2(xi, C, mu, x, alpha, phi, params);
             xi -= gamma(n) * L1(xi, theta, x, alpha, phi, params);
             ++n;
-            return std::make_pair(xi, C);
+            return std::make_tuple(xi, C);
         }
 };
 

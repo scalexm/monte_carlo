@@ -24,7 +24,7 @@ template<class Phi, class Gamma, class Distribution, class Generator>
 class approx_sequence {
     private:
         const Phi & phi;
-        double alpha, xi = 0, C = 0; // On choisit $\xi_0 = C_0 = 0$ car toujours intégrables.
+        double alpha, xi = 0, C = 0; // On choisit $\xi_0 = C_0 = 0$.
         const Gamma & gamma;
         int n = 0;
 
@@ -32,7 +32,7 @@ class approx_sequence {
         Generator & g;
 
     public:
-        using result_type = std::pair<double, double>;
+        using result_type = std::tuple<double, double>;
 
         approx_sequence(
             double alpha,
@@ -47,14 +47,14 @@ class approx_sequence {
         auto next() -> result_type {
             if (n == 0) {
                 ++n;
-                return std::make_pair(xi, C);
+                return std::make_tuple(xi, C);
             }
 
             double x = phi(d(g));
             C -= gamma(n) * (C - v(xi, x, alpha));
             xi -= gamma(n) * H1(xi, x, alpha);
             ++n;
-            return std::make_pair(xi, C);
+            return std::make_tuple(xi, C);
         }
 };
 

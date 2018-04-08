@@ -111,6 +111,7 @@ class IS_kernel {
                 alpha,
                 std::get<0>(phase1_result),
                 std::get<1>(phase1_result),
+                std::get<2>(phase1_result),
                 phi,
                 gamma,
                 d,
