@@ -7,7 +7,7 @@
 namespace detail {
 
 template<class InputType, class Phi, class Distribution>
-inline auto L3(
+auto L3(
     double xi,
     InputType theta,
     InputType x,
@@ -20,7 +20,7 @@ inline auto L3(
 }
 
 template<class InputType, class Phi, class Distribution>
-inline auto L4(
+auto L4(
     double xi,
     const InputType & mu,
     const InputType & x,
@@ -91,7 +91,7 @@ class IS_phase1_sequence {
 };
 
 template<class InputType, class Phi, class Distribution>
-inline auto L1(
+auto L1(
     double xi,
     const InputType & theta,
     const InputType & x,
@@ -106,7 +106,7 @@ inline auto L1(
 }
 
 template<class InputType, class Phi, class Distribution>
-inline auto L2(
+auto L2(
     double xi,
     double C,
     const InputType & mu,

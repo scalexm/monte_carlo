@@ -21,7 +21,7 @@ struct TupleAdd<Tuple, 1> {
 };
 
 template<class... T>
-inline auto operator +(
+auto operator +(
     const std::tuple<T...> & l,
     const std::tuple<T...> & r
 ) -> std::tuple<T...>
@@ -47,7 +47,7 @@ struct TupleSub<Tuple, 1> {
 };
 
 template<class... T>
-inline auto operator -(
+auto operator -(
     const std::tuple<T...> & l,
     const std::tuple<T...> & r
 ) -> std::tuple<T...>
@@ -73,7 +73,7 @@ struct TupleMul<Tuple, Arg, 1> {
 };
 
 template<class Arg, class... T>
-inline auto operator *(
+auto operator *(
     const std::tuple<T...> & l,
     const Arg & r
 ) -> std::tuple<T...>
@@ -84,7 +84,7 @@ inline auto operator *(
 }
 
 template<class Arg, class... T>
-inline auto operator *(
+auto operator *(
     const Arg & l,
     const std::tuple<T...> & r
 ) -> std::tuple<T...>
@@ -108,7 +108,7 @@ struct TupleDiv<Tuple, Arg, 1> {
 };
 
 template<class Arg, class... T>
-inline auto operator /(
+auto operator /(
     const std::tuple<T...> & l,
     const Arg & r
 ) -> std::tuple<T...>

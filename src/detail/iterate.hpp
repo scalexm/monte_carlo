@@ -4,7 +4,7 @@
 namespace detail {
 
 template<class Sequence>
-inline auto iterate(
+auto iterate(
     Sequence sequence,
     int iterations
 ) -> typename Sequence::result_type

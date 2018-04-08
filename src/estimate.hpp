@@ -127,7 +127,7 @@ class IS_kernel {
         }
 };
 
-auto identity(double x) -> double {
+inline auto identity(double x) -> double {
     return x;
 }
 
@@ -135,7 +135,7 @@ template<
     class Phi = decltype(identity),
     class Gamma = decltype(steps::inverse)
 >
-inline auto stochastic_gradient(
+auto stochastic_gradient(
     double alpha,
     int iterations,
     const Phi & phi = identity,
