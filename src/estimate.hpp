@@ -7,9 +7,9 @@
 #include "detail/averaging.hpp"
 #include "steps.hpp"
 
-enum class Averaging {
-    Yes,
-    No,
+enum class averaging {
+    yes,
+    no,
 };
 
 // Calcul de la VaR et de la CVaR qui suit l'approche par gradient stochastique présentée en
@@ -22,7 +22,7 @@ class approx_kernel {
         const Phi & phi;
         const Gamma & gamma;
         double alpha;
-        Averaging avg;
+        averaging avg;
         int iterations;
 
     public:
@@ -37,7 +37,7 @@ class approx_kernel {
             double alpha,
             const Phi & phi,
             const Gamma & gamma,
-            Averaging avg,
+            averaging avg,
             int iterations
         ) :
             alpha { alpha }, phi { phi }, gamma { gamma }, avg { avg },
@@ -60,7 +60,7 @@ class approx_kernel {
                 g
             };
 
-            if (avg == Averaging::No) {
+            if (avg == averaging::no) {
                 return detail::iterate(seq, iterations);
             } else {
                 auto avg_seq = detail::averaging<decltype(seq)> { std::move(seq) };
@@ -75,7 +75,7 @@ class IS_kernel {
         const Phi & phi;
         const Gamma & gamma;
         double alpha, a;
-        Averaging avg;
+        averaging avg;
         int iterations;
     
     public:
@@ -84,7 +84,7 @@ class IS_kernel {
             double a,
             const Phi & phi,
             const Gamma & gamma,
-            Averaging avg,
+            averaging avg,
             int iterations
         ) :
             alpha { alpha }, a { a }, phi { phi }, gamma { gamma }, avg { avg },
@@ -118,7 +118,7 @@ class IS_kernel {
                 g
             };
 
-            if (avg == Averaging::No) {
+            if (avg == averaging::no) {
                 return detail::iterate(phase2, iterations);
             } else {
                 auto avg_seq = detail::averaging<decltype(phase2)> { std::move(phase2) };
@@ -140,7 +140,7 @@ auto stochastic_gradient(
     int iterations,
     const Phi & phi = identity,
     const Gamma & gamma = steps::inverse, // par défaut, on prend $\gamma_n = \frac{1}{n}$
-    Averaging avg = Averaging::No
+    averaging avg = averaging::no
 ) -> approx_kernel<Phi, Gamma>
 {
     return approx_kernel<Phi, Gamma> { alpha, phi, gamma, avg, iterations };
@@ -156,7 +156,7 @@ auto importance_sampling(
     int iterations,
     const Phi & phi = identity,
     const Gamma & gamma = steps::inverse,
-    Averaging avg = Averaging::No
+    averaging avg = averaging::no
 ) -> IS_kernel<Phi, Gamma>
 {
     return IS_kernel<Phi, Gamma> {

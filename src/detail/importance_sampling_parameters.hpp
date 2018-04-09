@@ -19,19 +19,19 @@ class IS_params {
             static_assert(d == d, "distribution not supported");
         }
 
-        auto b() -> double const {
+        auto b() const -> double {
             static_assert(d == d, "distribution not supported");
         }
 
-        auto rho() -> double const {
+        auto rho() const -> double {
             static_assert(d == d, "distribution not supported");
         }
 
-        auto incr(const input_type & x, const input_type & theta) -> double const {
+        auto incr(const input_type & x, const input_type & theta) const -> double {
             static_assert(d == d, "distribution not supported");
         }
 
-        auto W(const input_type & x, const input_type & theta) -> double const {
+        auto W(const input_type & x, const input_type & theta) const -> double {
             static_assert(d == d, "distribution not supported");
         }
 };
@@ -46,15 +46,15 @@ class IS_params<std::normal_distribution<>> {
         {
         }
 
-        auto b() -> double const {
+        auto b() const -> double {
             return 2;
         }
 
-        auto rho() -> double const {
+        auto rho() const -> double {
             return 0.5;
         }
 
-        auto incr(const double & x, const double & theta) -> double const {
+        auto incr(const double & x, const double & theta) const -> double {
             auto mu = d.mean();
             auto stddev = d.stddev();
             auto y = x - mu;
@@ -62,7 +62,7 @@ class IS_params<std::normal_distribution<>> {
             return std::exp(0.5 / stddev / stddev * (y * y - z * z));
         }
 
-        auto W(const double & x, const double & theta) -> double const {
+        auto W(const double & x, const double & theta) const -> double {
             auto mu = d.mean();
             auto stddev = d.stddev();
             auto q = theta / stddev;
