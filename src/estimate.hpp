@@ -60,12 +60,14 @@ class approx_kernel {
                 g
             };
 
+            std::tuple<double, double> result;
             if (avg == averaging::no) {
-                return detail::iterate(seq, iterations);
+                result = detail::iterate(seq, iterations);
             } else {
                 auto avg_seq = detail::averaging<decltype(seq)> { std::move(seq) };
-                return detail::iterate(avg_seq, iterations);
+                result = detail::iterate(avg_seq, iterations);
             }
+            return std::make_pair(std::get<0>(result), std::get<1>(result));
         }
 };
 
@@ -118,12 +120,14 @@ class IS_kernel {
                 g
             };
 
+            std::tuple<double, double> result;
             if (avg == averaging::no) {
-                return detail::iterate(phase2, iterations);
+                result = detail::iterate(phase2, iterations);
             } else {
                 auto avg_seq = detail::averaging<decltype(phase2)> { std::move(phase2) };
-                return detail::iterate(avg_seq, iterations);
+                result = detail::iterate(avg_seq, iterations);
             }
+            return std::make_pair(std::get<0>(result), std::get<1>(result));
         }
 };
 

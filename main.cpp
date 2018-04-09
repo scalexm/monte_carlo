@@ -15,7 +15,7 @@ void command_line(int argc, char ** argv) {
     auto method = method::stochastic_gradient;
     auto averaging = averaging::no;
     double exponent = 1.;
-    int offset = 0;
+    double offset = 0.;
 
     auto parser = command_line_parser { argc, argv };
     parser.dummy();
@@ -49,7 +49,7 @@ void command_line(int argc, char ** argv) {
                 throw "bad exponent value: " + value;
             hdl->next_arg();
             value = hdl->value();
-            try { offset = std::stoi(value); } catch(...) { offset = -1; }
+            try { offset = std::stod(value); } catch(...) { offset = -1.; }
             if (offset < 0)
                 throw "bad offset value: " + value;
         } else {
