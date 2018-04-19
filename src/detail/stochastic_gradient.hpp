@@ -6,7 +6,7 @@
 
 namespace detail {
 
-// Fonction $H1$ de l'article.
+// Fonction $H1$ de l'article, définie au début de la section 2.2.
 inline auto H1(double xi, double x, double alpha) -> double {
     if (x < xi)
         return 1;
@@ -34,6 +34,11 @@ class approx_sequence {
     public:
         using result_type = std::tuple<double, double>;
 
+        // Paramètres du constructeur:
+        // * `alpha`, `phi`, `gamma`: cf les paramètres de
+        //   `src/estimate.hpp/approx_kernel::approx_kernel`
+        // * `d`, `g`: cf les paramètres de
+        //   `src/estimate.hpp/approx_kernel::compute`
         approx_sequence(
             double alpha,
             const Phi & phi,
@@ -44,6 +49,8 @@ class approx_sequence {
         {
         }
 
+        // Chaque appel à `next` renvoie la valeur suivante de la suite
+        // $n \longmapsto (\xi_n, C_n)$.
         auto next() -> result_type {
             if (n == 0) {
                 ++n;

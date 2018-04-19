@@ -1,8 +1,6 @@
 #include "src/estimate.hpp"
-#include "command_line_parser.hpp"
 #include <random>
 #include <iostream>
-#include <vector>
 
 enum class method {
     stochastic_gradient,
@@ -17,54 +15,59 @@ void command_line(int argc, char ** argv) {
     double exponent = 1.;
     double offset = 0.;
 
-    auto parser = command_line_parser { argc, argv };
-    parser.dummy();
-    while (!parser.finished()) {
-        std::unique_ptr<command_line_parser::handle> hdl;
-        if ((hdl = parser.enter("--method"))) {
-            hdl->next_arg();
-            auto value = hdl->value();
-            if (value == "stochastic-gradient") {
+    int i = 0;
+    // Paramètres de la ligne de commande, cf `README.txt`.
+    while (i < argc) {
+        auto option = std::string { argv[i] };
+        if (option == "--method") {
+            ++i;
+            if (i == argc)
+                throw "missing argument for `--method`";
+            auto value = std::string { argv[i] };
+            if (value == "stochastic-gradient")
                 method = method::stochastic_gradient;
-            } else if (value == "importance-sampling") {
+            else if (value == "importance-sampling")
                 method = method::importance_sampling;
-            } else {
+            else
                 throw "bad method name: " + value;
-            }
-        } else if ((hdl = parser.enter("--averaging"))) {
-            hdl->next_arg();
-            auto value = hdl->value();
-            if (value == "yes") {
+        } else if (option == "--averaging") {
+            ++i;
+            if (i == argc)
+                throw "missing argument for `--averaging`";
+            auto value = std::string { argv[i] };
+            if (value == "yes")
                 averaging = averaging::yes;
-            } else if (value == "no") {
+            else if (value == "no")
                 averaging = averaging::no;
-            } else {
+            else
                 throw "bad averaging parameter: " + value;
-            }
-        } else if ((hdl = parser.enter("--step"))) {
-            hdl->next_arg();
-            auto value = hdl->value();
+        } else if (option == "--step") {
+            ++i;
+            if (i == argc)
+                throw "missing argument for `--step`";
+            auto value = std::string { argv[i] };
             try { exponent = std::stod(value); } catch(...) { exponent = -1.; }
             if (exponent <= 0 || exponent > 1)
                 throw "bad exponent value: " + value;
-            hdl->next_arg();
-            value = hdl->value();
+            ++i;
+            if (i == argc)
+                throw "missing argument for `--step`";
+            value = std::string { argv[i] };
             try { offset = std::stod(value); } catch(...) { offset = -1.; }
             if (offset < 0)
                 throw "bad offset value: " + value;
         } else {
-            auto dummy = parser.dummy();
-            auto value = dummy->value();
             if (alpha < 0) {
-                try { alpha = std::stod(value); } catch(...) { alpha = -1.; }
+                try { alpha = std::stod(option); } catch(...) { alpha = -1.; }
                 if (alpha <= 0 || alpha >= 1)
-                    throw "bad alpha value: " + value;
+                    throw "bad alpha value: " + option;
             } else if (N < 0) {
-                try { N = std::stoi(value); } catch(...) { N = -1; }
+                try { N = std::stoi(option); } catch(...) { N = -1; }
                 if (N <= 100)
-                    throw "bad N value: " + value;
+                    throw "bad N value: " + option;
             }
         }
+        ++i;
     }
 
     if (alpha < 0)

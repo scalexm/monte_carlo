@@ -12,7 +12,7 @@ enum class averaging {
     no,
 };
 
-// Calcul de la VaR et de la CVaR qui suit l'approche par gradient stochastique présentée en
+// Calcul de la V@R et de la CV@R qui suit l'approche par gradient stochastique présentée en
 // section 2.2. Pour simplifier, on n'offre pas la possibilité de calculer la $\Psi$-CVaR,
 // ou bien pour résumer on fixe $\Psi = Id$.
 // En pratique, ne converge bien que pour un niveau de confiance proche de 1/2.
@@ -27,12 +27,12 @@ class approx_kernel {
 
     public:
         // Paramètres du constructeur:
-        // - `alpha`: niveau de confiance
-        // - `phi`: foncteur `* -> double` représentant la fonction de perte $\phi$
-        // - `gamma`: foncteur `int -> double`, `gamma(n)` représentant la suite $\gamma_n$
+        // * `alpha`: niveau de confiance
+        // * `phi`: foncteur `* -> double` représentant la fonction de perte $\phi$
+        // * `gamma`: foncteur `int -> double`, `gamma(n)` représentant la suite $\gamma_n$
         //            de l'article
-        // - `avg`: appliquer ou non la moyennisation de Ruppert et Polyak (théorème 2.3)
-        // - `iterations`: nombre d'itérations de l'algorithme
+        // * `avg`: appliquer ou non la moyennisation de Ruppert et Polyak (théorème 2.3)
+        // * `iterations`: nombre d'itérations de l'algorithme
         approx_kernel(
             double alpha,
             const Phi & phi,
@@ -46,9 +46,9 @@ class approx_kernel {
         }
 
         // Paramètres génériques d'un noyau de calcul:
-        // - `d`: foncteur `Generator -> *` représentant la distribution de $X$,
+        // * `d`: foncteur `Generator -> *` représentant la distribution de $X$,
         //        usuellement on prend un objet défini dans le header <random>
-        // - `g`: générateur de nombre aléatoires, usuellement on prend aussi un objet
+        // * `g`: générateur de nombre aléatoires, usuellement on prend aussi un objet
         //        défini dans le header <random>
         template<class Distribution, class Generator>
         auto compute(Distribution & d, Generator & g) -> std::pair<double, double> {
@@ -71,6 +71,7 @@ class approx_kernel {
         }
 };
 
+// Calcul de la V@R et CV@R avec la technique d'importance sampling de la section 3.
 template<class Phi, class Gamma>
 class IS_kernel {
     private:
@@ -81,6 +82,9 @@ class IS_kernel {
         int iterations;
     
     public:
+        // Paramètres du constructeur:
+        // * `alpha`, `phi`, `gamma`, `avg`, `gamma`: cf `approx_kernel::approx_kernel`
+        // * `a`: paramètre du contrôle exponentiel sur $x \longmapsto \phi^2(x)$
         IS_kernel(
             double alpha,
             double a,
@@ -94,8 +98,10 @@ class IS_kernel {
         {
         }
 
+        // Paramètres génériques d'un noyau de calcul: cf `approx_kernel::compute`.
         template<class Distribution, class Generator>
         auto compute(Distribution & d, Generator & g) -> std::pair<double, double> {
+            // On fixe le nombre d'itérations pour la première phase à `iterations / 100`.
             auto M = iterations / 100;
             auto phase1 = detail::IS_phase1_sequence<Phi, Gamma, Distribution, Generator> {
                 alpha,
@@ -109,6 +115,7 @@ class IS_kernel {
 
             auto phase1_result = detail::iterate(phase1, M);
 
+            // On réinjecte les paramètres estimés dans la première phase pour la deuxième phase.
             auto phase2 = detail::IS_phase2_sequence<Phi, Gamma, Distribution, Generator> {
                 alpha,
                 std::get<0>(phase1_result),
@@ -135,6 +142,9 @@ inline auto identity(double x) -> double {
     return x;
 }
 
+// Fonction utilitaire pour ne pas à avoir à écrire explicitement les paramètres template
+// de la classe `approx_kernel`: en effet, le compilateur peut inférer les paramètres template
+// d'une fonction (mais pas d'une classe).
 template<
     class Phi = decltype(identity),
     class Gamma = decltype(steps::inverse)
@@ -150,6 +160,7 @@ auto stochastic_gradient(
     return approx_kernel<Phi, Gamma> { alpha, phi, gamma, avg, iterations };
 }
 
+// Cf plus haut, idem mais pour `IS_kernel`.
 template<
     class Phi = decltype(identity),
     class Gamma = decltype(steps::inverse)

@@ -3,6 +3,13 @@
 
 #include <tuple>
 
+// Opérations génériques sur les tuple (absentes de la bibliothèque standard): addition
+// et soustraction terme à terme, multiplication et division par un scalaire. Beaucoup de
+// template meta-programming laborieux, pas forcément très intéressant à regarder.
+//
+// On s'en sert pour `src/detail/averaging.hpp/averaging::next` (en effet c'est beaucoup
+// pour pas grand chose, mais à peu près indispensable si on veut garder la généricité de
+// cette méthode).
 namespace detail {
 
 template<class Tuple, size_t N>
@@ -20,6 +27,7 @@ struct TupleAdd<Tuple, 1> {
     }
 };
 
+// Addition terme à terme.
 template<class... T>
 auto operator +(
     const std::tuple<T...> & l,
@@ -46,6 +54,7 @@ struct TupleSub<Tuple, 1> {
     }
 };
 
+// Soustraction terme à terme.
 template<class... T>
 auto operator -(
     const std::tuple<T...> & l,
@@ -72,6 +81,7 @@ struct TupleMul<Tuple, Arg, 1> {
     }
 };
 
+// Multiplication à droite par un scalaire.
 template<class Arg, class... T>
 auto operator *(
     const std::tuple<T...> & l,
@@ -83,6 +93,7 @@ auto operator *(
     return result;
 }
 
+// Mutiplication à gauche par un scalaire.
 template<class Arg, class... T>
 auto operator *(
     const Arg & l,
@@ -107,6 +118,7 @@ struct TupleDiv<Tuple, Arg, 1> {
     }
 };
 
+// Division (uniquement à droite) par un scalaire.
 template<class Arg, class... T>
 auto operator /(
     const std::tuple<T...> & l,

@@ -3,6 +3,8 @@
 
 namespace detail {
 
+// Fonction utilitaire qui retourne le $n$-ième terme d'une suite donnée, $n$ étant ici
+// décrit par le paramètre `iterations`.
 template<class Sequence>
 auto iterate(
     Sequence sequence,

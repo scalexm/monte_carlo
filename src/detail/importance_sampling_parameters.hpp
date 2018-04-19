@@ -6,6 +6,14 @@
 
 namespace detail {
 
+// Classe générique servant uniquement de squelette. On spécialise la classe
+// pour chaque distribution voulue, en donnant les paramètres de cette distribution
+// pour l'algorithme d'importance sampling, à savoir:
+// * $b$ et $\rho$
+// * $(x, \theta) \longmapsto \frac{p(x+\theta)}{p(x)}$, représentée ici par la méthode `incr`
+// * $(x, \theta) \longmapsto \frac{p^2(x-\theta)}{p(x)p(x-2\theta)} \frac{\nabla p(x-2\theta)}{p(x-2\theta)}}$,
+//   qui intervient dans le gradient des fonctions à optimiser $Q_1$ et $Q_2$, représentée ici
+//   par la méthode `W`
 template<class Distribution>
 class IS_params {
     private:
@@ -36,6 +44,8 @@ class IS_params {
         }
 };
 
+// Paramètres décrits plus haut pour la loi normale (a priori pour une moyenne et un
+// écart-type quelconque).
 template<>
 class IS_params<std::normal_distribution<>> {
     private:

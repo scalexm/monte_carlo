@@ -6,6 +6,9 @@
 
 namespace detail {
 
+// Fonction $L3$ de l'article, définie dans la section 3.1.
+// En plus de $\xi$, $\theta$ et $x$, on prend aussi en argument les paramètres $\rho$,
+// $b$ etc de la distribution choisie via un objet de type `IS_params<Distribution>`.
 template<class InputType, class Phi, class Distribution>
 auto L3(
     double xi,
@@ -19,6 +22,9 @@ auto L3(
     return std::exp(-2 * p.rho() * std::pow(std::abs(theta), p.b())) * p.W(x, theta);
 }
 
+// Fonction $L4$ de l'article, définie dans la section 3.1, avec un contrôle
+// exponentiel sur $x \longmapsto \phi^2(x)$ de la forme $C e^{a|x|}$, la constante
+// $a$ étant décrite ici par le paramètre du même nom.
 template<class InputType, class Phi, class Distribution>
 auto L4(
     double xi,
@@ -33,6 +39,9 @@ auto L4(
     return std::exp(-2 * a * (norm * norm + 1)) * L3(xi, mu, x, phi, p) * diff * diff;
 }
 
+// Phase 1 de l'algorithme d'importance sampling: calcule une première estimation
+// de (\xi_\alpha^*, \theta^*, \mu^*) en faisant `M` itérations avec un niveau `alpha`
+// adaptatif.
 template<class Phi, class Gamma, class Distribution, class Generator>
 class IS_phase1_sequence {
     private:
@@ -52,6 +61,12 @@ class IS_phase1_sequence {
     public:
         using result_type = std::tuple<double, double, double>;
 
+        // Paramètres du constructeur:
+        // * `alpha`, `phi`, `gamma`, `d`, `g`: cf les paramètres de
+        //   `src/detail/stochastic_gradient.hpp/approx_sequence::approx_sequence`
+        // * `a`: constante dams le contrôle exponentiel de $x \longmapsto \phi^2(x)$
+        // * `M`: nombre d'itérations pour cette phase, à connaître pour régler le seuil
+        //   `alpha`
         IS_phase1_sequence(
             double alpha,
             double a,
@@ -66,12 +81,16 @@ class IS_phase1_sequence {
         {
         }
 
+        // Chaque appel à `next` renvoie la valeur suivante de la suite
+        // $n \longmapsto (\xi_n, \theta_n, \mu_n)$, calculée avec un niveau
+        // de confiance adaptatif.
         auto next() -> result_type {
             if (n == 0) {
                 ++n;
                 return std::make_tuple(xi, theta, mu);
             }
             
+            // Niveau de confiance adaptatif
             double alpha_n;
             int treshold = M / 3;
             if (alpha > 0.5 && n <= treshold)
@@ -90,6 +109,7 @@ class IS_phase1_sequence {
         }
 };
 
+// Fonction $L1$ de l'article, définie dans la section 2.1.
 template<class InputType, class Phi, class Distribution>
 auto L1(
     double xi,
@@ -105,6 +125,7 @@ auto L1(
     return factor * (1 - 1 / (1 - alpha) * p.incr(x, theta));
 }
 
+// Fonction $L2$ de l'article, définie dans la section 2.1.
 template<class InputType, class Phi, class Distribution>
 auto L2(
     double xi,
@@ -122,6 +143,10 @@ auto L2(
     return result - 1 / (1 - alpha) * (val - xi) * p.incr(x, mu);
 }
 
+// Phase 2 de l'algorithme d'importance sampling: on part des valeurs de $\xi_\alpha^*$,
+// $\theta^*$ et $\mu^*$ estimées dans la phase 1. À noter qu'on ne fera plus évoluer les
+// estimations de $\theta^*$ et $\mu^*$, seulement celles de $\xi_\alpha^*$ et bien sûr
+// $C_\alpha^*$.
 template<class Phi, class Gamma, class Distribution, class Generator>
 class IS_phase2_sequence {
     private:
@@ -140,6 +165,10 @@ class IS_phase2_sequence {
     public:
         using result_type = std::tuple<double, double>;
 
+        // Paramètres du constructeur:
+        // * `alpha`, `phi`, `gamma`, `d`, `g`: cf les paramètres de
+        //   `src/detail/stochastic_gradient.hpp/approx_sequence::approx_sequence`
+        // * `xi`, `theta`, `mu`: valeurs estimées dans la phase 1
         IS_phase2_sequence(
             double alpha,
             double xi,
@@ -155,6 +184,8 @@ class IS_phase2_sequence {
         {
         }
 
+        // Chaque appel à `next` renvoie la valeur suivante de la suite
+        // $n \longmapsto (\xi_n, C_n)$.
         auto next() -> result_type {
             if (n == 0) {
                 ++n;

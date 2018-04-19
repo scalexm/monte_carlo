@@ -6,7 +6,7 @@
 
 namespace detail {
 
-// Moyennise une suite donnée.
+// Moyennise une suite donnée à la volée.
 template<class Sequence>
 class averaging {
 private:
