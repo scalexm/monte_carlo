@@ -6,11 +6,7 @@
 #include "detail/iterate.hpp"
 #include "detail/averaging.hpp"
 #include "steps.hpp"
-
-enum class averaging {
-    yes,
-    no,
-};
+#include "averaging.hpp"
 
 // Calcul de la V@R et de la CV@R qui suit l'approche par gradient stochastique présentée en
 // section 2.2. Pour simplifier, on n'offre pas la possibilité de calculer la $\Psi$-CVaR,

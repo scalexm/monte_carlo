@@ -17,12 +17,16 @@ namespace detail {
 template<class Distribution>
 class IS_params {
     private:
-        Distribution & d;
+        const Distribution & d;
 
+        // Type inference hack: permet de récupérer le type de retour de la distribution
+        // choisie sans avoir à rajouter un paramètre template supplémentaire. Pourrait
+        // être utile notamment pour spécialiser avec des distributions à valeurs
+        // multi-dimensionnelles.
         using input_type = decltype(d(std::mt19937 { std::random_device { }() }));
 
     public:
-        IS_params(Distribution & d) : d { d }
+        IS_params(const Distribution & d) : d { d }
         {
             static_assert(d == d, "distribution not supported");
         }
@@ -49,10 +53,10 @@ class IS_params {
 template<>
 class IS_params<std::normal_distribution<>> {
     private:
-        std::normal_distribution<> & d;
+        const std::normal_distribution<> & d;
 
     public:
-        IS_params(std::normal_distribution<> & d) : d { d }
+        IS_params(const std::normal_distribution<> & d) : d { d }
         {
         }
 
@@ -61,7 +65,8 @@ class IS_params<std::normal_distribution<>> {
         }
 
         auto rho() const -> double {
-            return 0.5;
+            auto stddev = d.stddev();
+            return 0.5 / stddev / stddev;
         }
 
         auto incr(const double & x, const double & theta) const -> double {
@@ -77,6 +82,39 @@ class IS_params<std::normal_distribution<>> {
             auto stddev = d.stddev();
             auto q = theta / stddev;
             return std::exp(q * q) * (2 * theta - x + mu);
+        }
+};
+
+template<>
+class IS_params<std::exponential_distribution<>> {
+    private:
+        const std::exponential_distribution<> & d;
+    
+    public:
+        IS_params(const std::exponential_distribution<> & d) : d { d }
+        {
+        }
+
+        auto b() const -> double {
+            return 1.0;
+        }
+
+        auto rho() const -> double {
+            return d.lambda();
+        }
+
+        auto incr(const double & x, const double & theta) const -> double {
+            if (x + theta < 0)
+                return 0;
+            return std::exp(-d.lambda() * theta);
+        }
+
+        auto W(const double & x, const double & theta) const -> double {
+            if (x - theta < 0)
+                return 0;
+            if (x - 2 * theta < 0)
+                return 2 * d.lambda() * std::exp(-2 * d.lambda() * (x - 2 * theta));
+            return -2 * d.lambda();
         }
 };
 
