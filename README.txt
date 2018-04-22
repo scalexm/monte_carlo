@@ -37,7 +37,7 @@ commande, décrites dans une section ci-dessous.
     2, la fonction de perte étant simplement l'identité. Il permet de comparer les résultats
     obtenus par les méthodes stochastiques aux résultats en formule fermée.
 
-    Pour compiler cet exécutable: `g++ -O2 -std=c++11 exponential_distribution.cpp
+    Pour compiler cet exécutable: `g++ -O2 -std=c++11 exponential_distribution.cpp \
                                    command_line.cpp -o exponential_distribution`
     Pour l'exécuter: `./exponential_distribution [options] <alpha> <N>`.
     Sortie du programme: `<xi>,<C>`
